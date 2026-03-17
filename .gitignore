@@ -1,0 +1,27 @@
+# Mac
+.DS_Store
+
+# Virtuelle Umgebung
+venv/
+
+# Doppelter Unterordner
+bundesliga-predictor/
+
+# Daten (werden per data_loader.py neu generiert)
+data/
+
+# Modelle (werden per model.py neu trainiert)
+models/
+
+# Plots (werden automatisch generiert)
+plots/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
