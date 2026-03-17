@@ -10,10 +10,10 @@ A machine learning project that predicts Bundesliga match outcomes (Home Win / D
 |--------|-------|
 | **Overall Accuracy** | ~48% |
 | **Baseline (random)** | 33.3% |
-| **Improvement over baseline** | +14-15% |
+| **Improvement over baseline** | +14% |
 | **Best predicted class** | Away Win (F1: 0.60) |
 
-> Predicting football matches is fundamentally difficult — even professional bookmakers struggle with draws. This model focuses on being realistic rather than overfitted.
+> Predicting football matches is fundamentally difficult. This model focuses on being realistic rather than overfitted.
 
 ---
 
