@@ -151,20 +151,3 @@ Matchday schedule from [OpenLigaDB](https://api.openligadb.de) — free open foo
 
 **David**  
 [GitHub](https://github.com/DavidStaufer) · [LinkedIn](https://linkedin.com/in/DavidStaufer)
-```
-
-Dann noch die `requirements.txt` updaten damit sie vollständig ist:
-```
-pandas
-numpy
-scikit-learn
-xgboost
-matplotlib
-seaborn
-jupyter
-requests
-openpyxl
-joblib
-imbalanced-learn
-beautifulsoup4
-nbformat

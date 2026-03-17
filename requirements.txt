@@ -7,3 +7,7 @@ seaborn
 jupyter
 requests
 openpyxl
+joblib
+imbalanced-learn
+beautifulsoup4
+nbformat
