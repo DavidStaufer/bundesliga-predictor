@@ -1,27 +1,22 @@
 # Mac
 .DS_Store
 
-# Virtuelle Umgebung
-venv/
-
-# Doppelter Unterordner
-bundesliga-predictor/
-
-# Daten (werden per data_loader.py neu generiert)
-data/
-
-# Modelle (werden per model.py neu trainiert)
-models/
-
-# Plots (werden automatisch generiert)
-plots/
-
 # Python
 __pycache__/
 *.pyc
+.venv/
+venv/
+.pytest_cache/
 
-# Jupyter
+# Daten werden per "python -m bundesliga update" geladen
+data/
+
+# Eigene Spieltagsvorhersagen
+predictions/
+
+# Große Backtest-Ausgabe (wird per "python -m bundesliga backtest" erzeugt)
+reports/backtest_predictions.csv
+
+# Jupyter / Editor
 .ipynb_checkpoints/
-
-# VS Code
 .vscode/

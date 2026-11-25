@@ -1,0 +1,263 @@
+{
+  "weights": {
+    "own": {
+      "elo": 0.4611,
+      "dc": 0.5389
+    },
+    "combined": {
+      "elo": 0.0,
+      "dc": 0.0,
+      "market": 1.0
+    }
+  },
+  "fitted_on_seasons": [
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "history": [
+    {
+      "season": 2008,
+      "own": {
+        "elo": 0.5,
+        "dc": 0.5
+      },
+      "combined": {
+        "elo": 0.333,
+        "dc": 0.333,
+        "market": 0.333
+      }
+    },
+    {
+      "season": 2009,
+      "own": {
+        "elo": 0.604,
+        "dc": 0.396
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2010,
+      "own": {
+        "elo": 0.585,
+        "dc": 0.415
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2011,
+      "own": {
+        "elo": 0.901,
+        "dc": 0.099
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2012,
+      "own": {
+        "elo": 0.63,
+        "dc": 0.37
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2013,
+      "own": {
+        "elo": 0.535,
+        "dc": 0.465
+      },
+      "combined": {
+        "elo": 0.053,
+        "dc": 0.001,
+        "market": 0.946
+      }
+    },
+    {
+      "season": 2014,
+      "own": {
+        "elo": 0.546,
+        "dc": 0.454
+      },
+      "combined": {
+        "elo": 0.045,
+        "dc": 0.0,
+        "market": 0.955
+      }
+    },
+    {
+      "season": 2015,
+      "own": {
+        "elo": 0.588,
+        "dc": 0.412
+      },
+      "combined": {
+        "elo": 0.119,
+        "dc": 0.0,
+        "market": 0.881
+      }
+    },
+    {
+      "season": 2016,
+      "own": {
+        "elo": 0.522,
+        "dc": 0.478
+      },
+      "combined": {
+        "elo": 0.078,
+        "dc": 0.0,
+        "market": 0.922
+      }
+    },
+    {
+      "season": 2017,
+      "own": {
+        "elo": 0.437,
+        "dc": 0.563
+      },
+      "combined": {
+        "elo": 0.048,
+        "dc": 0.014,
+        "market": 0.938
+      }
+    },
+    {
+      "season": 2018,
+      "own": {
+        "elo": 0.437,
+        "dc": 0.563
+      },
+      "combined": {
+        "elo": 0.003,
+        "dc": 0.0,
+        "market": 0.997
+      }
+    },
+    {
+      "season": 2019,
+      "own": {
+        "elo": 0.545,
+        "dc": 0.455
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2020,
+      "own": {
+        "elo": 0.502,
+        "dc": 0.498
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2021,
+      "own": {
+        "elo": 0.435,
+        "dc": 0.565
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2022,
+      "own": {
+        "elo": 0.449,
+        "dc": 0.551
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2023,
+      "own": {
+        "elo": 0.478,
+        "dc": 0.522
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2024,
+      "own": {
+        "elo": 0.461,
+        "dc": 0.539
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2025,
+      "own": {
+        "elo": 0.448,
+        "dc": 0.552
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    },
+    {
+      "season": 2026,
+      "own": {
+        "elo": 0.461,
+        "dc": 0.539
+      },
+      "combined": {
+        "elo": 0.0,
+        "dc": 0.0,
+        "market": 1.0
+      }
+    }
+  ]
+}

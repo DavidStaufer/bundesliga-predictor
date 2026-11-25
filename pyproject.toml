@@ -1,0 +1,9 @@
+[project]
+name = "bundesliga-predictor"
+version = "2.0.0"
+description = "Bundesliga match predictions with Elo, Dixon-Coles and betting odds, including Kicktipp tips"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
