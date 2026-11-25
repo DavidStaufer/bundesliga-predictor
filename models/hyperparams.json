@@ -1,0 +1,26 @@
+{
+  "elo": {
+    "k": 10,
+    "home_adv": 20,
+    "season_regression": 0.33,
+    "init": 1500.0
+  },
+  "dixon_coles": {
+    "half_life_days": 270,
+    "window_days": null,
+    "ridge": 3.0,
+    "promoted_strength": 20.0
+  },
+  "tuned_on_seasons": [
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013
+  ],
+  "validation_log_loss": {
+    "elo": 1.00625,
+    "dixon_coles": 1.00672
+  }
+}

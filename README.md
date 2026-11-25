@@ -1,153 +1,165 @@
 # Bundesliga Match Predictor
 
-A machine learning project that predicts Bundesliga match outcomes (Home Win / Draw / Away Win) using XGBoost and historical match data.
+Predicts Bundesliga matches as full scoreline probabilities: home win / draw / away win,
+expected goals, and the [Kicktipp](https://www.kicktipp.de) tip with the most expected points.
+Built from Elo ratings, a Dixon-Coles goal model and bookmaker odds, and evaluated with a
+strict walk-forward backtest over 12+ seasons.
 
 ---
 
 ## Results
 
-| Metric | Score |
-|--------|-------|
-| **Overall Accuracy** | ~48% |
-| **Baseline (random)** | 33.3% |
-| **Improvement over baseline** | +14% |
-| **Best predicted class** | Away Win (F1: 0.60) |
+Walk-forward backtest 2014/15 – 2026/27 (3,762 matches). Every matchday was predicted only
+with data that was available before kickoff.
 
-> Predicting football matches is fundamentally difficult. This model focuses on being realistic rather than overfitted.
+| Model | Log loss ↓ | RPS ↓ | Accuracy | Kicktipp pts / match |
+|---|---|---|---|---|
+| Base rates (historical H/D/A mix) | 1.069 | 0.230 | 44.6 % | 1.17 |
+| Elo | 0.997 | 0.205 | 51.1 % | 1.31 |
+| Dixon-Coles | 0.996 | 0.204 | 51.5 % | 1.32 |
+| **Own ensemble (Elo + Dixon-Coles)** | **0.995** | **0.204** | **51.4 %** | **1.31** |
+| Bookmakers (average odds) | 0.980 | 0.200 | 52.6 % | 1.34 |
+| Ensemble + odds | 0.980 | 0.200 | 52.5 % | 1.34 |
 
----
+Guessing 1/3 for every outcome gives a log loss of 1.099.
 
-## Project Structure
-```
-bundesliga-predictor/
-├── data/
-│   ├── bundesliga_historical.csv   # 11 seasons training data (2014-2025)
-│   ├── bundesliga_2526_raw.csv     # Current season 2025/26
-│   └── bundesliga_features.csv     # Engineered features
-├── models/
-│   ├── best_model.pkl              # Trained XGBoost model
-│   ├── scaler.pkl                  # StandardScaler
-│   └── label_encoder.pkl           # Label encoder
-├── notebooks/
-│   └── bundesliga_predictor.ipynb  # Full analysis notebook
-├── plots/
-│   ├── feature_importance.png
-│   ├── confusion_matrix.png
-│   └── evaluation.png
-├── src/
-│   ├── data_loader.py              # Download match data
-│   ├── features.py                 # Feature engineering
-│   ├── model.py                    # Model training & evaluation
-│   ├── predict_future.py           # Match predictor class
-│   └── scraper.py                  # Auto-fetch matchday schedule
-└── README.md
-```
+- The own model beats "always predict a home win" (44.6 %) by about 7 points and is well
+  calibrated: when it says 40 %, it happens about 40 % of the time.
+- It does **not** beat the bookmakers. When the ensemble may also use the odds, it learns a
+  weight of 100 % for the market: the odds already contain everything Elo and Dixon-Coles
+  know. That is the expected outcome with public data, and the tool uses the odds whenever
+  they are available.
+- Kicktipp (standard 4/3/2 scoring): about 400 points per season with the own model,
+  about 408 with odds.
+
+![Log loss per season](reports/log_loss_per_season.png)
+
+Full numbers per season, Kicktipp points and a calibration plot: [reports/backtest.md](reports/backtest.md).
+
+### Compared to version 1
+
+Version 1 (XGBoost + SMOTE on 42 hand-made features) was re-evaluated on 2024/25:
+**41.5 % accuracy and a log loss of 1.101, slightly worse than guessing.** The ~48 % it
+reported came from evaluation bugs: swapped class names in the classification report,
+every test match counted twice, and a draw threshold tuned on the test data.
+Version 2 on the same season: 51.6 % / 1.017 (own model) and 52.0 % / 0.990 (with odds).
 
 ---
 
-## Features Used
+## How it works
 
-| Feature Group | Description |
-|---|---|
-| **Form (last 5 games)** | Points, goals, goal difference |
-| **Home / Away strength** | PPG separately at home and away |
-| **Trend** | Last 3 games vs previous 3 |
-| **League position** | Points, GD, rank at time of match |
-| **Head-to-Head** | Results of last 5 meetings |
-| **Rest days** | Days since last match (fatigue) |
-| **Stability index** | Goal variance (draw indicator) |
-| **Result streak** | Current winning/losing streak |
+Every model produces a **scoreline matrix** per match, `P(home scores i, away scores j)`.
+Home/draw/away probabilities, expected goals and the Kicktipp tip all follow from it.
+
+1. **Data.** Results and average odds from football-data.co.uk since 2005/06 (6,500+ matches),
+   fixtures from OpenLigaDB, odds for upcoming matches from football-data's fixtures file.
+   Team names from both sources are mapped to one spelling; an unknown name stops the run
+   instead of silently dropping a match.
+2. **Elo.** One rating per club that carries across seasons. Big wins count more, ratings move
+   a third of the way back to the league mean each summer, and promoted clubs inherit the
+   average rating of the clubs they replace. A Poisson regression turns the rating gap into
+   expected goals.
+3. **Dixon-Coles.** Attack and defence strength per club, home advantage and a correction for
+   low scores (0:0, 1:1). Fitted by maximum likelihood with exponentially decaying weights
+   (half-life 270 days), ridge shrinkage, and a prior that pulls promoted clubs towards the
+   relegated clubs' strength.
+4. **Market.** Bookmaker margin removed, then the expected goals that reproduce the
+   1X2 and over/under 2.5 probabilities are solved for, giving a full scoreline matrix.
+5. **Ensemble.** A weighted mix of the scoreline matrices. Weights are learned by minimising
+   log loss on earlier seasons' out-of-sample predictions.
+6. **Kicktipp tip.** For every candidate tip, the expected points over the whole scoreline
+   matrix. The most likely scoreline is often not the best tip; a draw almost never is.
+
+### Methodology
+
+- **Walk-forward:** models are refitted before every block of matchdays (Fri–Sun or midweek)
+  using only earlier matches.
+- **No tuning on test data:** hyperparameters were chosen by grid search on 2008/09–2013/14
+  ([models/hyperparams.json](models/hyperparams.json)); results are reported from 2014/15 on.
+  Ensemble weights for a season are learned only from earlier seasons.
+- **Proper scoring rules:** log loss and RPS judge the probabilities themselves, not just
+  whether the favourite won.
 
 ---
 
-## Getting Started
+## Usage
 
-**1. Clone the repository**
 ```bash
-git clone https://github.com/yourusername/bundesliga-predictor.git
-cd bundesliga-predictor
-```
-
-**2. Create virtual environment**
-```bash
-python -m venv venv
-source venv/bin/activate  # Mac/Linux
-venv\Scripts\activate     # Windows
-```
-
-**3. Install dependencies**
-```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**4. Download data & train model**
 ```bash
-python src/data_loader.py   # Download match data
-python src/model.py         # Train XGBoost model
+python -m bundesliga predict                  # current matchday
+python -m bundesliga predict --spieltag 12    # a specific matchday
+python -m bundesliga predict --modell own     # own model only, ignore odds
+python -m bundesliga backtest                 # rerun the backtest, writes reports/
+python -m bundesliga tune                     # re-tune hyperparameters (about 45 s)
+python -m bundesliga update                   # only refresh the data
+pytest                                        # 45 tests, no network needed
 ```
 
-**5. Predict next matchday**
-```bash
-python src/predict_future.py
-# Enter matchday number when prompted (e.g. 25)
+Example (matchday 11, 2026/27, before odds were published). The CLI output is in German:
+
+```
+Bundesliga 2026/27, 11. Spieltag
+
+         Anstoß          Heim          Gast    1    X    2      xG Tipp  erw. Punkte  Basis
+Fr 27.11. 20:30 Werder Bremen    M'gladbach 54 % 24 % 22 % 1.9:1.1  2:1         1.40 Modell
+Sa 28.11. 15:30       Hamburg Bayern Munich  9 % 15 % 76 % 0.9:2.8  0:2         1.82 Modell
+Sa 28.11. 15:30       FC Koln    Elversberg 43 % 26 % 30 % 1.6:1.3  2:1         1.17 Modell
+So 29.11. 15:30      Freiburg    RB Leipzig 36 % 25 % 39 % 1.5:1.6  1:2         1.06 Modell
+So 29.11. 19:30      Dortmund    Leverkusen 53 % 24 % 23 % 1.9:1.2  2:1         1.38 Modell
+...
+```
+
+football-data.co.uk usually publishes odds for the upcoming matchday on Tuesdays and Fridays.
+Until then the tool falls back to the own model and says so; run it again later for the
+odds-based version. Predictions are saved to `predictions/`.
+
+---
+
+## Project structure
+
+```
+bundesliga-predictor/
+├── bundesliga/
+│   ├── __main__.py        # command line: update, tune, backtest, predict
+│   ├── data.py            # download and normalise results + odds
+│   ├── fixtures.py        # OpenLigaDB fixtures, upcoming odds
+│   ├── teams.py           # one spelling per club
+│   ├── scores.py          # scoreline matrices, odds -> expected goals
+│   ├── kicktipp.py        # points and the best tip
+│   ├── metrics.py         # log loss, RPS, Brier, accuracy
+│   ├── models/
+│   │   ├── elo.py
+│   │   ├── dixon_coles.py
+│   │   ├── market.py
+│   │   └── ensemble.py
+│   ├── backtest.py        # walk-forward backtest and tuning
+│   ├── predict.py         # matchday prediction
+│   └── report.py          # reports/backtest.md and charts
+├── models/                # tuned hyperparameters and ensemble weights (JSON)
+├── reports/               # backtest report and charts
+└── tests/
 ```
 
 ---
 
-## Example Output
-```
-=======================================================
-  Dortmund vs Bayern Munich  |  2026-02-28
-=======================================================
-  Dortmund gewinnt:   32.8%
-  Unentschieden:        17.0%
-  Bayern Munich gewinnt:   50.2%
--------------------------------------------------------
-  Prediction: Bayern Munich gewinnt
-=======================================================
-  Form (letzte 5):  Dortmund 13Pts (Trend: -0.7)  |  Bayern Munich 10Pts (Trend: +1.7)
-  Tabelle:  Dortmund Platz 2 (52Pts)  |  Bayern Munich Platz 1 (60Pts)
-  H2H (letzte 5):  Dortmund 1S — 2U — 2S Bayern Munich
-```
+## Limitations
 
----
+- No line-ups, injuries or expected-goals (xG) data.
+- The odds are averages collected one to two days before kickoff; closing odds would be sharper.
+- Kicktipp uses the default rules (4 exact / 3 goal difference / 2 tendency, no goal-difference
+  points for draws). Other rules can be set in `bundesliga/kicktipp.py`.
 
-## Weekly Update Workflow
-```bash
-python src/data_loader.py    # Fetch latest results
-python src/model.py          # Retrain on updated data
-python src/predict_future.py # Predict upcoming matchday
-```
+## Data sources
 
----
-
-## Tech Stack
-
-![Python](https://img.shields.io/badge/Python-3.13-blue)
-![XGBoost](https://img.shields.io/badge/XGBoost-2.0-orange)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5-red)
-![pandas](https://img.shields.io/badge/pandas-2.0-green)
-
----
-
-## Limitations & Future Improvements
-
-- **Player-level data** — injuries and suspensions are not considered
-- **Expected Goals (xG)** — would significantly improve predictions
-- **Betting odds** as implicit market signal
-- **LSTM / Deep Learning** for better time-series modeling
-- **Live data integration** for real-time predictions
-
----
-
-## Data Source
-
-Match data from [football-data.co.uk](https://www.football-data.co.uk/germany.php) — free historical Bundesliga results.
-Matchday schedule from [OpenLigaDB](https://api.openligadb.de) — free open football API.
-
----
+- Results and odds: [football-data.co.uk](https://www.football-data.co.uk/germany.php)
+- Fixtures: [OpenLigaDB](https://www.openligadb.de)
 
 ## Author
 
-**David**  
+**David**
 [GitHub](https://github.com/DavidStaufer) · [LinkedIn](https://linkedin.com/in/DavidStaufer)
